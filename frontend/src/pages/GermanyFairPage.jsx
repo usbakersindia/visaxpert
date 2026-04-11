@@ -323,29 +323,54 @@ export default function GermanyFairPage() {
         </div>
       </section>
 
-      {/* VisaXpert Branding */}
-      <section className="py-10 bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-6">
-            <img src={LOGO_URL} alt="VisaXpert" className="h-10 mx-auto mb-2 brightness-200" />
-            <p className="text-amber-400 font-bold text-xs uppercase tracking-[0.2em]">The Germany Study Abroad Specialist</p>
+      {/* VisaXpert Branding — Why Trust Us */}
+      <section className="py-16 md:py-20 bg-white relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-72 h-72 bg-amber-100 rounded-full blur-[100px] -translate-x-1/2 -translate-y-1/2 opacity-60"></div>
+        <div className="absolute bottom-0 right-0 w-72 h-72 bg-orange-100 rounded-full blur-[100px] translate-x-1/2 translate-y-1/2 opacity-60"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center mb-12">
+            <img src={LOGO_URL} alt="VisaXpert" className="h-12 mx-auto mb-4" />
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-2">
+              The Germany Study Abroad Specialist
+            </h2>
+            <p className="text-slate-500 max-w-xl mx-auto">Trusted by thousands of students for their German education journey</p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10" data-testid="brand-stat-visas">
-              <p className="text-2xl md:text-3xl font-black text-amber-400">4000+</p>
-              <p className="text-white/50 text-xs mt-1">Germany Visas</p>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+            <div className="relative group" data-testid="brand-stat-visas">
+              <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-6 text-center text-white shadow-lg shadow-amber-500/20 group-hover:shadow-xl group-hover:shadow-amber-500/30 transition-all group-hover:-translate-y-1">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <GraduationCap size={24} className="text-white" />
+                </div>
+                <p className="text-4xl font-black">4000+</p>
+                <p className="text-white/80 text-sm font-medium mt-1">Germany Visas Processed</p>
+              </div>
             </div>
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10" data-testid="brand-stat-years">
-              <p className="text-2xl md:text-3xl font-black text-orange-400">Since 2012</p>
-              <p className="text-white/50 text-xs mt-1">14 Years Experience</p>
+            <div className="relative group" data-testid="brand-stat-years">
+              <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl p-6 text-center text-white shadow-lg shadow-slate-500/20 group-hover:shadow-xl group-hover:shadow-slate-500/30 transition-all group-hover:-translate-y-1">
+                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <Clock size={24} className="text-amber-400" />
+                </div>
+                <p className="text-4xl font-black">14<span className="text-lg">yrs</span></p>
+                <p className="text-white/60 text-sm font-medium mt-1">Experience Since 2012</p>
+              </div>
             </div>
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10" data-testid="brand-stat-success">
-              <p className="text-2xl md:text-3xl font-black text-emerald-400">Best</p>
-              <p className="text-white/50 text-xs mt-1">Visa Success Rate for Germany</p>
+            <div className="relative group" data-testid="brand-stat-success">
+              <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-6 text-center text-white shadow-lg shadow-emerald-500/20 group-hover:shadow-xl group-hover:shadow-emerald-500/30 transition-all group-hover:-translate-y-1">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <Shield size={24} className="text-white" />
+                </div>
+                <p className="text-4xl font-black">Best</p>
+                <p className="text-white/80 text-sm font-medium mt-1">Visa Success Rate for Germany</p>
+              </div>
             </div>
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10" data-testid="brand-stat-icef">
-              <p className="text-2xl md:text-3xl font-black text-blue-400">ICEF</p>
-              <p className="text-white/50 text-xs mt-1">Certified Agency</p>
+            <div className="relative group" data-testid="brand-stat-icef">
+              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl p-6 text-center text-white shadow-lg shadow-blue-500/20 group-hover:shadow-xl group-hover:shadow-blue-500/30 transition-all group-hover:-translate-y-1">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <BadgeCheck size={24} className="text-white" />
+                </div>
+                <p className="text-4xl font-black">ICEF</p>
+                <p className="text-white/80 text-sm font-medium mt-1">Certified Agency</p>
+              </div>
             </div>
           </div>
         </div>
@@ -491,7 +516,7 @@ export default function GermanyFairPage() {
       {/* Footer */}
       <footer className="bg-slate-900 py-12 border-t border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
               <img src={LOGO_URL} alt="VisaXpert" className="h-10 mb-3 brightness-200" />
               <p className="text-amber-400 text-xs font-bold uppercase tracking-wider mb-2">The Germany Study Abroad Specialist</p>
@@ -506,10 +531,30 @@ export default function GermanyFairPage() {
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-bold mb-4">Contact Us</h4>
-              <div className="space-y-2 text-sm text-slate-400">
-                <a href="tel:9875985641" className="flex items-center gap-2 hover:text-white transition-colors"><Phone size={14} className="text-amber-500" /> 9875985641</a>
-                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition-colors"><MessageCircle size={14} className="text-green-500" /> WhatsApp Us</a>
+              <h4 className="text-white font-bold mb-4">Berlin Office</h4>
+              <div className="space-y-3 text-sm text-slate-400">
+                <div className="flex items-start gap-2">
+                  <MapPin size={14} className="text-amber-500 mt-0.5 flex-shrink-0" />
+                  <span>Belziger Strasse 69-71, 10823, Berlin, Germany</span>
+                </div>
+                <a href="tel:+4915774493633" className="flex items-center gap-2 hover:text-white transition-colors">
+                  <Phone size={14} className="text-amber-500" /> +49 1577 4493633
+                </a>
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-white transition-colors">
+                  <MessageCircle size={14} className="text-green-500" /> WhatsApp Us
+                </a>
+              </div>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-4">Contact India</h4>
+              <div className="space-y-3 text-sm text-slate-400">
+                <a href="tel:9875985641" className="flex items-center gap-2 hover:text-white transition-colors">
+                  <Phone size={14} className="text-amber-500" /> 9875985641
+                </a>
+                <a href="mailto:info@visaxpertinternational.co.in" className="flex items-center gap-2 hover:text-white transition-colors">
+                  <MessageCircle size={14} className="text-amber-500" /> info@visaxpertinternational.co.in
+                </a>
+                <p className="text-slate-500 text-xs pt-2">Branches in Ludhiana, Amritsar, Pathankot & Jammu</p>
               </div>
             </div>
           </div>
