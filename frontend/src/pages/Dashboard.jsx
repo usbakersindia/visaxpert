@@ -32,6 +32,13 @@ import {
   Link,
   Zap,
   GraduationCap,
+  Star,
+  MessageSquare,
+  Plus,
+  Image,
+  ToggleLeft,
+  ToggleRight,
+  Ticket,
 } from "lucide-react";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -43,6 +50,8 @@ const sourceColors = {
   google: "bg-green-100 text-green-700",
   google_sheets: "bg-emerald-100 text-emerald-700",
   university_change: "bg-teal-100 text-teal-700",
+  germany_fair: "bg-amber-100 text-amber-700",
+  ivr_missed_call: "bg-orange-100 text-orange-700",
   webhook: "bg-gray-100 text-gray-700",
 };
 
@@ -52,6 +61,8 @@ const sourceIcons = {
   google: Chrome,
   google_sheets: FileSpreadsheet,
   university_change: GraduationCap,
+  germany_fair: Ticket,
+  ivr_missed_call: Phone,
   webhook: Globe,
 };
 
@@ -95,6 +106,9 @@ export default function Dashboard() {
     last_sync_result: null
   });
   const [isSyncing, setIsSyncing] = useState(false);
+  const [activeTab, setActiveTab] = useState("leads");
+  const [reviews, setReviews] = useState([]);
+  const [showAddReview, setShowAddReview] = useState(false);
 
   // Check for saved session
   useEffect(() => {
@@ -190,6 +204,15 @@ export default function Dashboard() {
     }
   }, [getAuthParams]);
 
+  const fetchReviews = useCallback(async () => {
+    try {
+      const response = await axios.get(`${API}/dashboard/reviews?${getAuthParams()}`);
+      setReviews(response.data.reviews || []);
+    } catch (error) {
+      console.error("Failed to fetch reviews:", error);
+    }
+  }, [getAuthParams]);
+
   const handleSyncNow = async () => {
     if (!syncSettings.google_sheets_url) {
       toast.error("Please configure Google Sheets URL first");
@@ -218,8 +241,9 @@ export default function Dashboard() {
       fetchStats();
       fetchLeads();
       fetchSyncSettings();
+      fetchReviews();
     }
-  }, [isAuthenticated, fetchStats, fetchLeads, fetchSyncSettings]);
+  }, [isAuthenticated, fetchStats, fetchLeads, fetchSyncSettings, fetchReviews]);
 
   const handleStatusChange = async (leadId, newStatus) => {
     try {
@@ -231,6 +255,27 @@ export default function Dashboard() {
       fetchStats();
     } catch (error) {
       toast.error("Failed to update status");
+    }
+  };
+
+  const handleDeleteReview = async (reviewId) => {
+    if (!window.confirm("Delete this review?")) return;
+    try {
+      await axios.delete(`${API}/dashboard/reviews/${reviewId}?${getAuthParams()}`);
+      toast.success("Review deleted");
+      fetchReviews();
+    } catch (error) {
+      toast.error("Failed to delete review");
+    }
+  };
+
+  const handleToggleReview = async (reviewId) => {
+    try {
+      await axios.patch(`${API}/dashboard/reviews/${reviewId}/toggle?${getAuthParams()}`);
+      toast.success("Review status updated");
+      fetchReviews();
+    } catch (error) {
+      toast.error("Failed to toggle review");
     }
   };
 
@@ -423,6 +468,14 @@ export default function Dashboard() {
                 <span className="hidden sm:inline">Setup</span>
               </button>
               <button
+                onClick={() => setActiveTab(activeTab === "reviews" ? "leads" : "reviews")}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-sm font-medium ${activeTab === "reviews" ? "bg-amber-500 text-white" : "bg-amber-50 text-amber-700 hover:bg-amber-100"}`}
+                data-testid="reviews-tab-btn"
+              >
+                <Star size={16} />
+                <span className="hidden sm:inline">Reviews</span>
+              </button>
+              <button
                 onClick={() => { fetchStats(); fetchLeads(); fetchSyncSettings(); }}
                 className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
                 data-testid="refresh-btn"
@@ -456,6 +509,8 @@ export default function Dashboard() {
         )}
 
         {/* Filters & Actions */}
+        {activeTab === "leads" ? (
+        <>
         <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1 relative">
@@ -489,6 +544,8 @@ export default function Dashboard() {
                 <option value="meta">Meta Ads</option>
                 <option value="google">Google</option>
                 <option value="university_change">University Change</option>
+                <option value="germany_fair">Germany Fair</option>
+                <option value="ivr_missed_call">IVR Calls</option>
               </select>
             </div>
             
@@ -668,7 +725,94 @@ export default function Dashboard() {
             </>
           )}
         </div>
+        </>
+        ) : (
+        /* Reviews Management Tab */
+        <div className="space-y-6" data-testid="reviews-management">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-bold text-slate-900">Manage Reviews</h2>
+              <p className="text-sm text-slate-500 mt-1">Add reviews that appear on your landing pages</p>
+            </div>
+            <button
+              onClick={() => setShowAddReview(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium shadow-sm"
+              data-testid="add-review-btn"
+            >
+              <Plus size={16} />
+              Add Review
+            </button>
+          </div>
+
+          {reviews.length === 0 ? (
+            <div className="bg-white rounded-xl border border-slate-200 p-12 text-center">
+              <MessageSquare size={48} className="mx-auto text-slate-300 mb-4" />
+              <p className="text-slate-500 text-lg">No reviews yet</p>
+              <p className="text-slate-400 text-sm mt-1">Add reviews to display on your landing pages</p>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {reviews.map((review) => (
+                <div key={review.review_id} className={`bg-white rounded-xl border p-5 ${review.is_active ? 'border-slate-200' : 'border-red-200 bg-red-50/30'}`} data-testid={`review-card-${review.review_id}`}>
+                  <div className="flex items-start gap-4">
+                    {review.image_url ? (
+                      <img src={review.image_url} alt={review.name} className="w-14 h-14 rounded-full object-cover border-2 border-slate-100 flex-shrink-0" />
+                    ) : (
+                      <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                        <span className="text-amber-700 font-bold text-xl">{review.name.charAt(0)}</span>
+                      </div>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-semibold text-slate-900">{review.name}</h4>
+                        <span className="text-xs text-slate-400">|</span>
+                        <span className="text-sm text-slate-500">{review.country}</span>
+                        <span className={`ml-auto px-2 py-0.5 rounded-full text-xs font-medium ${review.page === 'main' ? 'bg-blue-100 text-blue-700' : review.page === 'university_change' ? 'bg-teal-100 text-teal-700' : 'bg-amber-100 text-amber-700'}`}>
+                          {review.page === 'main' ? 'Main Page' : review.page === 'university_change' ? 'Uni Change' : 'Germany Fair'}
+                        </span>
+                      </div>
+                      <div className="flex gap-0.5 mb-2">
+                        {[...Array(review.rating || 5)].map((_, i) => (
+                          <Star key={i} size={14} className="fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                      <p className="text-slate-600 text-sm">"{review.content}"</p>
+                      {!review.is_active && <p className="text-red-500 text-xs mt-2 font-medium">Hidden from pages</p>}
+                    </div>
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button
+                        onClick={() => handleToggleReview(review.review_id)}
+                        className={`p-2 rounded-lg transition-colors ${review.is_active ? 'text-green-600 hover:bg-green-50' : 'text-slate-400 hover:bg-slate-100'}`}
+                        title={review.is_active ? "Hide review" : "Show review"}
+                        data-testid={`toggle-review-${review.review_id}`}
+                      >
+                        {review.is_active ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteReview(review.review_id)}
+                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                        data-testid={`delete-review-${review.review_id}`}
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        )}
       </main>
+
+      {/* Add Review Modal */}
+      {showAddReview && (
+        <AddReviewModal
+          onClose={() => setShowAddReview(false)}
+          credentials={credentials}
+          onReviewAdded={() => { fetchReviews(); setShowAddReview(false); }}
+        />
+      )}
 
       {/* Lead Detail Modal */}
       {selectedLead && (
@@ -870,6 +1014,8 @@ function StatCard({ title, value, icon: Icon, color }) {
     purple: "bg-purple-50 text-purple-600",
     indigo: "bg-indigo-50 text-indigo-600",
     emerald: "bg-emerald-50 text-emerald-600",
+    teal: "bg-teal-50 text-teal-600",
+    amber: "bg-amber-50 text-amber-600",
   };
   
   return (
@@ -1178,6 +1324,168 @@ function GoogleSheetsSettings({ onClose, credentials, syncSettings, onSettingsSa
           </button>
         </div>
       </div>
+    </Modal>
+  );
+}
+
+
+// Add Review Modal Component
+function AddReviewModal({ onClose, credentials, onReviewAdded }) {
+  const [formData, setFormData] = useState({
+    name: "",
+    country: "",
+    content: "",
+    image_url: "",
+    rating: 5,
+    page: "main",
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.country || !formData.content) {
+      toast.error("Please fill in name, country, and review content");
+      return;
+    }
+    if (formData.content.length < 10) {
+      toast.error("Review content must be at least 10 characters");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      await axios.post(
+        `${API}/dashboard/reviews?email=${encodeURIComponent(credentials.email)}&password=${encodeURIComponent(credentials.password)}`,
+        formData
+      );
+      toast.success("Review added successfully!");
+      onReviewAdded();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || "Failed to add review");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Modal onClose={onClose} title="Add New Review" large>
+      <form onSubmit={handleSubmit} className="space-y-5" data-testid="add-review-form">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Student Name *</label>
+            <input
+              type="text"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="e.g. Priya Sharma"
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none text-sm"
+              data-testid="review-input-name"
+              required
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Country *</label>
+            <input
+              type="text"
+              value={formData.country}
+              onChange={(e) => setFormData({ ...formData, country: e.target.value })}
+              placeholder="e.g. Canada"
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none text-sm"
+              data-testid="review-input-country"
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Image URL (optional)</label>
+          <div className="flex gap-2">
+            <input
+              type="url"
+              value={formData.image_url}
+              onChange={(e) => setFormData({ ...formData, image_url: e.target.value })}
+              placeholder="https://example.com/photo.jpg"
+              className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none text-sm"
+              data-testid="review-input-image"
+            />
+            {formData.image_url && (
+              <img src={formData.image_url} alt="Preview" className="w-10 h-10 rounded-full object-cover border border-slate-200" onError={(e) => e.target.style.display='none'} />
+            )}
+          </div>
+          <p className="text-xs text-slate-400 mt-1">Paste a direct image URL for the student's photo</p>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Review Content *</label>
+          <textarea
+            value={formData.content}
+            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+            placeholder="Write the student's review..."
+            rows={4}
+            className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none text-sm resize-none"
+            data-testid="review-input-content"
+            required
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Rating</label>
+            <div className="flex gap-1">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <button
+                  key={star}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, rating: star })}
+                  className="p-1"
+                  data-testid={`review-star-${star}`}
+                >
+                  <Star
+                    size={24}
+                    className={star <= formData.rating ? "fill-amber-400 text-amber-400" : "text-slate-300"}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Display On Page</label>
+            <select
+              value={formData.page}
+              onChange={(e) => setFormData({ ...formData, page: e.target.value })}
+              className="w-full px-4 py-2.5 border border-slate-200 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent outline-none text-sm"
+              data-testid="review-select-page"
+            >
+              <option value="main">Main Landing Page</option>
+              <option value="university_change">University Change Page</option>
+              <option value="germany_fair">Germany Fair Page</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="flex gap-3 pt-2">
+          <button
+            type="button"
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex-1 px-4 py-2.5 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-sm font-medium disabled:opacity-50 flex items-center justify-center gap-2"
+            data-testid="review-submit-btn"
+          >
+            {isSubmitting ? (
+              <RefreshCw size={16} className="animate-spin" />
+            ) : (
+              <Plus size={16} />
+            )}
+            {isSubmitting ? "Adding..." : "Add Review"}
+          </button>
+        </div>
+      </form>
     </Modal>
   );
 }

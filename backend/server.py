@@ -1639,6 +1639,134 @@ async def get_setup_info():
     }
 
 
+# ==================== REVIEWS ENDPOINTS ====================
+
+class ReviewCreate(BaseModel):
+    name: str = Field(..., min_length=2, max_length=100)
+    country: str = Field(..., min_length=2, max_length=100)
+    content: str = Field(..., min_length=10, max_length=1000)
+    image_url: Optional[str] = None
+    rating: int = Field(default=5, ge=1, le=5)
+    page: str = Field(default="main")  # main, university_change, germany_fair
+
+class ReviewResponse(BaseModel):
+    review_id: str
+    name: str
+    country: str
+    content: str
+    image_url: Optional[str] = None
+    rating: int
+    page: str
+    created_at: str
+    is_active: bool
+
+@api_router.get("/reviews")
+async def get_reviews(page: Optional[str] = Query(None)):
+    """Get all active reviews, optionally filtered by page"""
+    try:
+        query = {"is_active": True}
+        if page:
+            query["page"] = page
+        cursor = db.reviews.find(query, {"_id": 0}).sort("created_at", -1)
+        reviews = await cursor.to_list(length=100)
+        for review in reviews:
+            if isinstance(review.get("created_at"), datetime):
+                review["created_at"] = review["created_at"].isoformat()
+        return {"reviews": reviews, "total": len(reviews)}
+    except Exception as e:
+        logger.error(f"Error fetching reviews: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch reviews")
+
+@api_router.post("/dashboard/reviews")
+async def create_review(
+    review: ReviewCreate,
+    email: str = Query(...),
+    password: str = Query(...)
+):
+    """Create a new review (admin only)"""
+    verify_auth(email, password)
+    try:
+        review_id = str(uuid.uuid4())
+        review_doc = {
+            "review_id": review_id,
+            "name": review.name,
+            "country": review.country,
+            "content": review.content,
+            "image_url": review.image_url or "",
+            "rating": review.rating,
+            "page": review.page,
+            "is_active": True,
+            "created_at": datetime.now(timezone.utc),
+        }
+        await db.reviews.insert_one(review_doc)
+        logger.info(f"Review created: {review_id} by {review.name}")
+        return {"success": True, "review_id": review_id, "message": "Review created successfully"}
+    except Exception as e:
+        logger.error(f"Error creating review: {e}")
+        raise HTTPException(status_code=500, detail="Failed to create review")
+
+@api_router.get("/dashboard/reviews")
+async def get_dashboard_reviews(
+    email: str = Query(...),
+    password: str = Query(...)
+):
+    """Get all reviews for dashboard management"""
+    verify_auth(email, password)
+    try:
+        cursor = db.reviews.find({}, {"_id": 0}).sort("created_at", -1)
+        reviews = await cursor.to_list(length=200)
+        for review in reviews:
+            if isinstance(review.get("created_at"), datetime):
+                review["created_at"] = review["created_at"].isoformat()
+        return {"reviews": reviews, "total": len(reviews)}
+    except Exception as e:
+        logger.error(f"Error fetching reviews: {e}")
+        raise HTTPException(status_code=500, detail="Failed to fetch reviews")
+
+@api_router.delete("/dashboard/reviews/{review_id}")
+async def delete_review(
+    review_id: str,
+    email: str = Query(...),
+    password: str = Query(...)
+):
+    """Delete a review"""
+    verify_auth(email, password)
+    try:
+        result = await db.reviews.delete_one({"review_id": review_id})
+        if result.deleted_count == 0:
+            raise HTTPException(status_code=404, detail="Review not found")
+        return {"success": True, "message": "Review deleted"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting review: {e}")
+        raise HTTPException(status_code=500, detail="Failed to delete review")
+
+@api_router.patch("/dashboard/reviews/{review_id}/toggle")
+async def toggle_review(
+    review_id: str,
+    email: str = Query(...),
+    password: str = Query(...)
+):
+    """Toggle review active status"""
+    verify_auth(email, password)
+    try:
+        review = await db.reviews.find_one({"review_id": review_id})
+        if not review:
+            raise HTTPException(status_code=404, detail="Review not found")
+        new_status = not review.get("is_active", True)
+        await db.reviews.update_one(
+            {"review_id": review_id},
+            {"$set": {"is_active": new_status}}
+        )
+        return {"success": True, "is_active": new_status}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error toggling review: {e}")
+        raise HTTPException(status_code=500, detail="Failed to toggle review")
+
+
 # ==================== APP SETUP ====================
 
 app.include_router(api_router)

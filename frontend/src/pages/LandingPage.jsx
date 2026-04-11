@@ -98,26 +98,9 @@ const services = [
   },
 ];
 
-const testimonials = [
-  {
-    name: "Priya Sharma",
-    country: "Canada",
-    text: "VisaXpert made my dream of studying in Canada a reality. Their team guided me through every step with patience and expertise.",
-    rating: 5,
-  },
-  {
-    name: "Rahul Verma",
-    country: "Australia",
-    text: "From course selection to visa approval, the support was exceptional. Highly recommend their services to anyone planning to study abroad.",
-    rating: 5,
-  },
-  {
-    name: "Ananya Singh",
-    country: "UK",
-    text: "The post-arrival support was incredible. They helped me find accommodation and settle in smoothly. Thank you VisaXpert!",
-    rating: 5,
-  },
-];
+const testimonials = [];
+
+// Dynamic reviews will be loaded from API
 
 const branches = [
   { 
@@ -525,6 +508,21 @@ export default function LandingPage() {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
   const [submittedName, setSubmittedName] = useState("");
+  const [reviews, setReviews] = useState([]);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const response = await axios.get(`${API}/reviews?page=main`);
+        if (response.data.reviews && response.data.reviews.length > 0) {
+          setReviews(response.data.reviews);
+        }
+      } catch (error) {
+        console.error("Failed to fetch reviews:", error);
+      }
+    };
+    fetchReviews();
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -1077,6 +1075,7 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials */}
+      {reviews.length > 0 && (
       <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 md:px-8 lg:px-12">
           <div className="text-center mb-12 md:mb-16">
@@ -1089,27 +1088,31 @@ export default function LandingPage() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-            {testimonials.map((testimonial, index) => (
+            {reviews.map((review, index) => (
               <div
-                key={index}
+                key={review.review_id || index}
                 className="testimonial-card"
                 data-testid={`testimonial-${index}`}
               >
                 <div className="flex gap-1 mb-4">
-                  {[...Array(testimonial.rating)].map((_, i) => (
+                  {[...Array(review.rating || 5)].map((_, i) => (
                     <Star key={i} size={20} className="fill-[#FACC15] text-[#FACC15]" />
                   ))}
                 </div>
-                <p className="text-[#64748B] mb-6">"{testimonial.text}"</p>
+                <p className="text-[#64748B] mb-6">"{review.content}"</p>
                 <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-[#2563EB]/10 rounded-full flex items-center justify-center">
-                    <span className="text-[#2563EB] font-bold text-lg">
-                      {testimonial.name.charAt(0)}
-                    </span>
-                  </div>
+                  {review.image_url ? (
+                    <img src={review.image_url} alt={review.name} className="w-12 h-12 rounded-full object-cover" />
+                  ) : (
+                    <div className="w-12 h-12 bg-[#2563EB]/10 rounded-full flex items-center justify-center">
+                      <span className="text-[#2563EB] font-bold text-lg">
+                        {review.name.charAt(0)}
+                      </span>
+                    </div>
+                  )}
                   <div>
-                    <p className="font-semibold text-[#0F172A]">{testimonial.name}</p>
-                    <p className="text-sm text-[#64748B]">Studies in {testimonial.country}</p>
+                    <p className="font-semibold text-[#0F172A]">{review.name}</p>
+                    <p className="text-sm text-[#64748B]">Studies in {review.country}</p>
                   </div>
                 </div>
               </div>
@@ -1117,6 +1120,7 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+      )}
 
       {/* CTA Section */}
       <section className="py-16 md:py-24 bg-[#0F172A]">
