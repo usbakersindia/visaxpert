@@ -85,10 +85,10 @@ const universities = [
 ];
 
 const benefits = [
-  { icon: Gift, title: "\u20AC1000 Additional Discount", description: "Exclusive additional discount of \u20AC1000 on university tuition fees for all fair attendees", highlight: "\u20AC1000 OFF", color: "from-amber-400 to-orange-500" },
-  { icon: Sparkles, title: "Up to 50% Fee Waiver", description: "Get up to 50% waiver on processing fees when you register at the fair", highlight: "50% WAIVER", color: "from-emerald-400 to-teal-500" },
-  { icon: Users, title: "Meet University Reps", description: "Interact directly with representatives from top German universities", highlight: "FACE-TO-FACE", color: "from-blue-400 to-indigo-500" },
-  { icon: BadgeCheck, title: "Spot Admissions", description: "Get on-the-spot admission offers from participating universities", highlight: "INSTANT ADMIT", color: "from-violet-400 to-purple-500" },
+  { icon: Gift, title: "\u20AC1000 Additional Discount", description: "Exclusive additional discount of \u20AC1000 on university tuition fees for all fair attendees", highlight: "\u20AC1000 OFF", sub: "in tuition fee", color: "from-amber-400 to-orange-500" },
+  { icon: Sparkles, title: "Up to 50% Fee Waiver", description: "Get up to 50% waiver on processing fees when you register at the fair", highlight: "50% WAIVER", sub: "in processing fee", color: "from-emerald-400 to-teal-500" },
+  { icon: Users, title: "Meet University Reps", description: "Representatives of private universities & specialists of public universities are joining", highlight: "FACE-TO-FACE", sub: "", color: "from-blue-400 to-indigo-500" },
+  { icon: BadgeCheck, title: "Spot Admissions", description: "Get on-the-spot admission offers from participating universities", highlight: "INSTANT ADMIT", sub: "", color: "from-violet-400 to-purple-500" },
 ];
 
 // Countdown Hook
@@ -253,16 +253,19 @@ export default function GermanyFairPage() {
                 <div className="text-center">
                   <p className="text-3xl font-black text-amber-400">{"\u20AC"}1000</p>
                   <p className="text-xs text-white/60 uppercase tracking-wider">Extra Discount</p>
+                  <p className="text-[10px] text-white/40">in tuition fee</p>
                 </div>
                 <div className="w-px bg-white/20"></div>
                 <div className="text-center">
                   <p className="text-3xl font-black text-emerald-400">50%</p>
                   <p className="text-xs text-white/60 uppercase tracking-wider">Fee Waiver</p>
+                  <p className="text-[10px] text-white/40">in processing fee</p>
                 </div>
                 <div className="w-px bg-white/20"></div>
-                <div className="text-center">
-                  <p className="text-3xl font-black text-blue-400">9+</p>
-                  <p className="text-xs text-white/60 uppercase tracking-wider">Universities</p>
+                <div className="text-center max-w-[140px]">
+                  <p className="text-xl font-black text-blue-400 leading-tight">Private Reps &</p>
+                  <p className="text-xl font-black text-blue-400 leading-tight">Public Experts</p>
+                  <p className="text-[10px] text-white/40 mt-1">university representatives</p>
                 </div>
               </div>
             </div>
@@ -333,9 +336,9 @@ export default function GermanyFairPage() {
             <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mb-2">
               The Germany Study Abroad Specialist
             </h2>
-            <p className="text-slate-500 max-w-xl mx-auto">Trusted by thousands of students for their German education journey</p>
+            <p className="text-slate-500 max-w-xl mx-auto">Trusted by thousands of students | Branch Office in Berlin</p>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-5">
             <div className="relative group" data-testid="brand-stat-visas">
               <div className="bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl p-6 text-center text-white shadow-lg shadow-amber-500/20 group-hover:shadow-xl group-hover:shadow-amber-500/30 transition-all group-hover:-translate-y-1">
                 <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3">
@@ -372,6 +375,15 @@ export default function GermanyFairPage() {
                 <p className="text-white/80 text-sm font-medium mt-1">Certified Agency</p>
               </div>
             </div>
+            <div className="relative group col-span-2 lg:col-span-1" data-testid="brand-stat-berlin">
+              <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-6 text-center text-white shadow-lg shadow-violet-500/20 group-hover:shadow-xl group-hover:shadow-violet-500/30 transition-all group-hover:-translate-y-1">
+                <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3">
+                  <MapPin size={24} className="text-white" />
+                </div>
+                <p className="text-4xl font-black">Berlin</p>
+                <p className="text-white/80 text-sm font-medium mt-1">Branch Office in Germany</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -391,6 +403,7 @@ export default function GermanyFairPage() {
                   <benefit.icon size={24} className="text-white" />
                 </div>
                 <div className={`inline-block px-3 py-1 rounded-full text-xs font-black tracking-wider mb-3 bg-gradient-to-r ${benefit.color} text-white`}>{benefit.highlight}</div>
+                {benefit.sub && <p className="text-[10px] text-slate-400 -mt-1 mb-2">{benefit.sub}</p>}
                 <h3 className="text-lg font-bold text-slate-900 mb-2">{benefit.title}</h3>
                 <p className="text-slate-500 text-sm leading-relaxed">{benefit.description}</p>
               </div>
